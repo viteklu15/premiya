@@ -390,14 +390,13 @@
 
     // Регистрация Service Worker
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').then(registration => {
-          console.log('ServiceWorker registration successful');
-        }).catch(err => {
-          console.log('ServiceWorker registration failed: ', err);
-        });
-      });
-    }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('Service Worker зарегистрирован', reg))
+      .catch(err => console.log('Ошибка регистрации Service Worker', err));
+  });
+}
+
 
     // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', () => {
