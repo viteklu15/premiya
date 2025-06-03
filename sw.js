@@ -1,9 +1,9 @@
 const CACHE_NAME = 'premium-calculator-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/premiya/',
+  '/premiya/index.html',
+  '/premiya/icons/icon-192x192.png',
+  '/premiya/icons/icon-512x512.png'
 ];
 
 self.addEventListener('install', event => {

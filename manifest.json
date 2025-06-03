@@ -2,18 +2,19 @@
   "name": "Калькулятор премии",
   "short_name": "Премия",
   "description": "Калькулятор для расчета премии на основе выполнения плана",
-  "start_url": "/",
+  "start_url": "/premiya/",
+  "scope": "/premiya/",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#4361ee",
   "icons": [
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/premiya/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/premiya/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
