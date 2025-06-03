@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#4361ee">
+  <meta name="description" content="Калькулятор для расчета премии на основе выполнения плана">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Калькулятор премии</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192x192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .container {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      transform: translateY(0);
+      transition: var(--transition);
+      animation: fadeInUp 0.5s ease;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    h2 {
+      color: var(--secondary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    .result {
+      background: linear-gradient(to right, #f8f9fa, #e9ecef);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-top: 2rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: var(--transition);
+    }
+    
+    .result.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .result-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .result-label {
+      font-weight: 500;
+    }
+    
+    .result-value {
+      font-weight: 600;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+    
+    .highlight {
+      color: var(--secondary);
+      animation: pulse 1s infinite alternate;
+    }
+    
+    @keyframes pulse {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.05);
+      }
+    }
+    
+    .currency {
+      color: var(--success);
+    }
+    
+    .progress-container {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, #4cc9f0, #4361ee);
+      border-radius: 4px;
+      width: 0;
+      transition: width 0.8s ease, background-color 0.3s ease;
+    }
+    
+    .error-message {
+      color: var(--danger);
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    /* Стиль для кнопки установки PWA */
+    .install-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .install-btn:hover {
+      background-color: var(--secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Калькулятор премии</h2>
+    
+    <div class="input-group">
+      <label for="plan">План (₽)</label>
+      <input type="text" id="plan" placeholder="Например: 7 500 000" inputmode="numeric">
+      <div class="error-message" id="plan-error">Введите корректную сумму</div>
+    </div>
+    
+    <div class="input-group">
+      <label for="revenue">Выручка (₽)</label>
+      <input type="text" id="revenue" placeholder="Например: 6 363 000" inputmode="numeric">
+      <div class="error-message" id="revenue-error">Введите корректную сумму</div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progress"></div>
+    </div>
+    
+    <div class="result" id="result">
+      <div class="result-item">
+        <span class="result-label">Процент выполнения плана:</span>
+        <span class="result-value" id="percent">0%</span>
+      </div>
+      <div class="result-item">
+        <span class="result-label">Премия:</span>
+        <span class="result-value"><span id="bonus">0</span> <span class="currency">₽</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Кнопка для установки PWA -->
+  <button class="install-btn" id="installBtn" title="Установить приложение">+</button>
+
+  <script>
+    const planInput = document.getElementById('plan');
+    const revenueInput = document.getElementById('revenue');
+    const percentOutput = document.getElementById('percent');
+    const bonusOutput = document.getElementById('bonus');
+    const resultContainer = document.getElementById('result');
+    const progressBar = document.getElementById('progress');
+    const planError = document.getElementById('plan-error');
+    const revenueError = document.getElementById('revenue-error');
+    const installBtn = document.getElementById('installBtn');
+
+    // Форматирование числа с пробелами между тысячами
+    function formatNumber(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
+
+    // Парсинг числа из форматированной строки
+    function parseFormattedNumber(str) {
+      return parseFloat(str.replace(/\s/g, '')) || 0;
+    }
+
+    function calculateBonus() {
+      const plan = parseFormattedNumber(planInput.value);
+      const revenue = parseFormattedNumber(revenueInput.value);
+
+      // Валидация ввода
+      let isValid = true;
+      
+      if (isNaN(plan) || plan <= 0) {
+        planError.style.display = 'block';
+        isValid = false;
+      } else {
+        planError.style.display = 'none';
+      }
+      
+      if (isNaN(revenue) || revenue < 0) {
+        revenueError.style.display = 'block';
+        isValid = false;
+      } else {
+        revenueError.style.display = 'none';
+      }
+
+      if (!isValid) {
+        resultContainer.classList.remove('show');
+        progressBar.style.width = '0';
+        percentOutput.textContent = '0%';
+        bonusOutput.textContent = '0';
+        return;
+      }
+
+      const percentRaw = (revenue / plan) * 100;
+      const percent = Math.min(Math.round(percentRaw), 200); // Ограничиваем до 200% для прогресс-бара
+      
+      // Анимация прогресс-бара
+      progressBar.style.width = `${Math.min(percent, 100)}%`;
+      
+      // Цвет прогресс-бара в зависимости от выполнения
+      if (percent >= 100) {
+        progressBar.style.background = 'linear-gradient(to right, #4cc9f0, #3a0ca3)';
+      } else if (percent >= 80) {
+        progressBar.style.background = 'linear-gradient(to right, #4cc9f0, #4361ee)';
+      } else {
+        progressBar.style.background = 'linear-gradient(to right, #f72585, #7209b7)';
+      }
+
+      let bonus = 0;
+
+      if (percent > 100) {
+        const extraPercent = percent - 100;
+        bonus = 40000 + extraPercent * 400;
+      } else if (percent >= 80) {
+        bonus = 10000 + (percent - 80) * 1500;
+      } else {
+        bonus = 0;
+      }
+
+      // Показываем результаты
+      resultContainer.classList.add('show');
+      
+      // Обновляем значения
+      percentOutput.textContent = `${percent}%`;
+      bonusOutput.textContent = formatNumber(Math.round(bonus));
+    }
+
+    // Обработчики событий для форматирования ввода
+    planInput.addEventListener('input', function(e) {
+      // Удаляем все нецифровые символы
+      let value = this.value.replace(/[^\d]/g, '');
+      
+      // Форматируем с пробелами
+      if (value.length > 0) {
+        value = formatNumber(parseInt(value));
+      }
+      
+      this.value = value;
+      calculateBonus();
+    });
+    
+    revenueInput.addEventListener('input', function(e) {
+      // Удаляем все нецифровые символы
+      let value = this.value.replace(/[^\d]/g, '');
+      
+      // Форматируем с пробелами
+      if (value.length > 0) {
+        value = formatNumber(parseInt(value));
+      }
+      
+      this.value = value;
+      calculateBonus();
+    });
+
+    // PWA Установка
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Предотвращаем автоматическое отображение подсказки
+      e.preventDefault();
+      // Сохраняем событие для последующего использования
+      deferredPrompt = e;
+      // Показываем кнопку установки
+      installBtn.style.display = 'flex';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      // Показываем подсказку установки
+      deferredPrompt.prompt();
+      
+      // Ждем, пока пользователь ответит на подсказку
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      // Можно использовать для аналитики
+      console.log(`User response to the install prompt: ${outcome}`);
+      
+      // Больше не нужен
+      deferredPrompt = null;
+      
+      // Скрываем кнопку
+      installBtn.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      // Скрываем кнопку установки
+      installBtn.style.display = 'none';
+      // Можно использовать для аналитики
+      console.log('PWA was installed');
+    });
+
+    // Регистрация Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+      resultContainer.classList.add('show');
+    });
+  </script>
+</body>
+</html>
