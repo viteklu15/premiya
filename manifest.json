@@ -2,7 +2,7 @@
   "name": "Калькулятор премии",
   "short_name": "Премия",
   "description": "Калькулятор для расчета премии на основе выполнения плана",
-  "start_url": "/premiya/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#4361ee",
